@@ -6,6 +6,8 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
 import User, { IUser } from '../models/User'
+// import auth from '../middleware/auth'
+const auth = require('../middleware/auth')
 
 // @route   GET api/users/
 // @desc    Get all users
@@ -38,11 +40,46 @@ router.get('/:username', async (req: Request, res: Response) => {
   }
 })
 
-// @route   POST api/users/register
+// @route   DELETE api/users/
+// @desc    Delete current user
+// @access  Private
+router.delete('/', auth, async (req: Request, res: Response) => {
+  const { id } = req.user
+  try {
+    await User.deleteOne({ _id: id })
+    res.send('User Deleted')
+  } catch (error) {
+    console.error(error.message)
+    res.status(500).send('Server error')
+  }
+})
+
+// @route   PATCH api/users/
+// @desc    Update current user
+// @access  Private
+router.patch('/', auth, async (req: Request, res: Response) => {
+  const { id } = req.user
+  const { username, mobile_token }: IUser = req.body
+
+  try {
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10)
+      const password = await bcrypt.hash(req.body.password, salt)
+    }
+
+    await User.update({ _id: id }, { username, mobile_token, password })
+    res.send('User updated')
+  } catch (error) {
+    console.error(error.message)
+    res.status(500).send('Server error')
+  }
+})
+
+// @route   POST api/users/signup
 // @desc    Register user
 // @access  Public
 router.post(
-  '/register',
+  '/signup',
   [
     check('username', 'Username is required').notEmpty(),
     check(
