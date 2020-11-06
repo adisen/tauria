@@ -37,4 +37,4 @@ To test it on your local machine, follow the following steps
 
 ## Documentation
 
-The documentation about the routes and how to use them can be found (Here)[https://documenter.getpostman.com/view/7996370/TVeiCAj8]
+The documentation about the routes and how to use them can be found [Here](https://documenter.getpostman.com/view/7996370/TVeiCAj8)
