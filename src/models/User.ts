@@ -4,7 +4,7 @@ export interface IUser extends mongoose.Document {
   username: string
   password: string
   mobile_token: string
-  rooms: object[]
+  rooms: { room: string }[]
 }
 
 const UserSchema = new mongoose.Schema({
