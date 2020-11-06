@@ -46,7 +46,13 @@ router.get('/:username', async (req: Request, res: Response) => {
 router.delete('/', auth, async (req: Request, res: Response) => {
   const { id } = req.user
   try {
-    await User.deleteOne({ _id: id })
+    const user = await User.findById(id)
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' })
+    }
+    await user.remove()
+
     res.send('User Deleted')
   } catch (error) {
     console.error(error.message)
@@ -54,21 +60,34 @@ router.delete('/', auth, async (req: Request, res: Response) => {
   }
 })
 
-// @route   PATCH api/users/
+// @route   PUT api/users/
 // @desc    Update current user
 // @access  Private
-router.patch('/', auth, async (req: Request, res: Response) => {
+router.put('/', auth, async (req: Request, res: Response) => {
   const { id } = req.user
-  const { username, mobile_token }: IUser = req.body
+  const { username, mobile_token, password }: IUser = req.body
 
   try {
-    if (req.body.password) {
-      const salt = await bcrypt.genSalt(10)
-      const password = await bcrypt.hash(req.body.password, salt)
-    }
+    let user = await User.findById(id)
+    if (user) {
+      if (username && user) {
+        user.username = username
+      }
 
-    await User.update({ _id: id }, { username, mobile_token, password })
-    res.send('User updated')
+      if (password && user) {
+        const salt = await bcrypt.genSalt(10)
+        user.password = await bcrypt.hash(req.body.password, salt)
+      }
+
+      if (mobile_token && user) {
+        user.mobile_token = mobile_token
+      }
+
+      await user?.save()
+      res.json({ msg: 'User updated' })
+    } else {
+      res.status(400).json({ msg: 'User not found' })
+    }
   } catch (error) {
     console.error(error.message)
     res.status(500).send('Server error')

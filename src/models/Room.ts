@@ -3,7 +3,7 @@ import mongoose, { Schema } from 'mongoose'
 export interface IRoom extends mongoose.Document {
   name: string
   host: string
-  participants: string[]
+  participants: object[]
   capacity: number
 }
 
